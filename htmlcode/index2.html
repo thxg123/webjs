@@ -9,8 +9,6 @@
   <link rel="stylesheet" href="dist/css/global.css">
 <script type="text/javascript" charset="utf-8" src="js/api.js"></script>
 <script type="text/javascript" charset="utf-8" src="js/jquery.min.js"></script>
-<script type="text/javascript" charset="utf-8" src="js/jquery.highlight/jquery.highlight.js"></script>
-<!--<script type="text/javascript" charset="utf-8" src="js/mark/mark.min.js"></script>-->
 <script type="text/javascript" charset="utf-8" src="js/clipboard.min.js"></script>
 
 <script type="text/javascript">
@@ -196,6 +194,159 @@ function Appcache() {
             });
         });
     } catch (e) {};
+};
+
+
+function markword(dom, word, type = "") {
+    if (word == "" || word == null || word == undefined) {
+        alert("请输入需要高亮的关键词！");
+        return;
+    } else {
+        try {
+            domtypeof = typeof2(dom);
+            domlength = dom.length;
+            if ((dom && domtypeof == "htmlcollection") && domlength > 0) {
+                dombool = true;
+                domjshtml = "htmlcollection";
+            } else if ((dom && domtypeof == "nodelist") && domlength > 0) {
+                dombool = true;
+                domjshtml = "nodelist";
+            } else if (dom && domtypeof.substr(0, 4) == "html") {
+                dombool = true;
+                domjshtml = "html";
+            } else {
+                dombool = false;
+                domjshtml = null;
+            }
+        } catch (err) {
+            domtypeof = typeof2(dom);
+            domlength = dom.length;
+            dombool = false;
+            domjshtml = null;
+        };
+        if ((dom && dombool && domjshtml) && dombool === true) {
+            if (dom && domtypeof != "string") {
+                if ((domjshtml === "htmlcollection" || domjshtml === "nodelist") && domlength > 0) {
+                    for (var i = 0, len = dom.length; i < len; i++) {
+                        highlightWord(dom[i], word);
+                    }
+                } else {
+                    highlightWord(dom, word);
+                }
+            }
+        } else {
+            if (dom && domtypeof == "string") {
+                if (type == "" || type == null || type == undefined) {
+                    if (dom.substr(0, 1) == "#" || dom.substr(0, 1) == ".") {
+                        var node = document.querySelector(dom);
+                        highlightWord(node, word);
+                    } else {
+                        var node = document.getElementById(dom);
+                        highlightWord(node, word);
+                    }
+                } else {
+                    if (type && type.toLowerCase() == "queryselectorall") {
+                        var node = document.querySelectorAll(dom);
+                        if (typeof2(node) == "nodelist" && node.length > 0) {
+                            for (var i = 0, len = node.length; i < len; i++) {
+                                highlightWord(node[i], word);
+                            }
+                        }
+                    } else if (type && type.toLowerCase() == "queryselector") {
+                        var node = document.querySelector(dom);
+                        highlightWord(node, word);
+                    } else if (type && type.toLowerCase() == "getelementbyid") {
+                        var node = document.getElementById(dom);
+                        highlightWord(node, word);
+                    } else {
+                        if (dom.substr(0, 1) == "#" || dom.substr(0, 1) == ".") {
+                            var node = document.querySelector(dom);
+                            highlightWord(node, word);
+                        } else {
+                            var node = document.getElementById(dom);
+                            highlightWord(node, word);
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+
+function highlightWord(node, word = "") {
+    if (node && word) {
+        if (node.nodeType === 3) {
+            //text node
+            if ((node.nodeValue != "" || node.nodeValue != null || node.nodeValue != undefined) && (word != "" || word != null || word != undefined)) {
+                tempNodeVal = node.nodeValue.toLowerCase();
+                tempWordVal = word.toLowerCase();
+                if (tempNodeVal.indexOf(tempWordVal) != -1) {
+                    pn = node.parentNode;
+                    if (pn.className != "highlight") {
+                        //word has not already been highlighted!
+                        nv = node.nodeValue;
+                        ni = tempNodeVal.indexOf(tempWordVal);
+                        //Create a load of replacement nodes
+                        before = document.createTextNode(nv.substr(0, ni));
+                        after = document.createTextNode(nv.substr(ni + word.length));
+                        docWordVal = nv.substr(ni, word.length);
+                        hiwordtext = document.createTextNode(docWordVal);
+                        hiword = document.createElement("span");
+                        hiword.className = "highlight";
+                        hiword.appendChild(hiwordtext);
+                        pn.insertBefore(before, node);
+                        pn.insertBefore(hiword, node);
+                        pn.insertBefore(after, node);
+                        pn.removeChild(node);
+                    }
+                }
+            }
+        } else if ((node.nodeType === 1 && node.childNodes) && !/(script|style)/i.test(node.tagName)) {
+            //Iterate into this nodes childNodes
+            var i;
+            for (i = 0; i < node.childNodes.length; i++) {
+                highlightWord(node.childNodes[i], word);
+            }
+        }
+    }
+};
+
+
+function normalizeTextNode(node) {
+    if (!node) {
+        return;
+    }
+    if (node.nodeType === 3) {
+        while (node.nextSibling && node.nextSibling.nodeType === 3) {
+            node.nodeValue += node.nextSibling.nodeValue;
+            node.parentNode.removeChild(node.nextSibling);
+        }
+    } else {
+        normalizeTextNode(node.firstChild);
+    }
+    normalizeTextNode(node.nextSibling);
+}
+
+
+function unmarkword(callback) {
+    var element = document.querySelectorAll("span.highlight");
+    element.forEach(function(el) {
+        var parent = el.parentNode;
+        var docFrag = document.createDocumentFragment();
+        while (el.firstChild) {
+            docFrag.appendChild(el.removeChild(el.firstChild));
+        }
+        parent.replaceChild(docFrag, el);
+        parent.normalize();
+        //normalizeTextNode(parent);
+    });
+    try {
+        if (callback) {
+            callback();
+        }
+    } catch (err) {};
+    return true;
 };
 </script>
 
@@ -621,16 +772,13 @@ $("#buttonid,#buttonid2").click(function() {
                         });
 
                         /*
-                        var context = document.querySelector(btnname);
-                        var instance = new Mark(context);
-                        instance.unmark();
-                        instance.mark(text, {
-                            "separateWordSearch": false
+                        unmarkword(function() {
+                            markword(btnname, text, "querySelector");
                         });
                         */
 
                         $(btnname).attr("textbool", "true");
-                        $(btnname).highlight(text);
+                        markword(btnname, text, "querySelector");
                     } else {
                         layer.close(loading2);
                         layer.msg("没有找到相关字符串", {
