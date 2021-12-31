@@ -488,7 +488,7 @@ mark {
     <div class="site-demo-editor">
       <div class="site-demo-area">
         <!--<textarea id="jsbody" placeholder="在此处输入代码" class="layui-textarea"></textarea>-->
-        <div class="textarea" contenteditable="true" placeholder="在此处输入代码" id="jsbody"></div>
+        <div class="textarea" contenteditable="true" placeholder="在此处输入代码" id="jsbody" textbool="false"></div>
       </div>
       <div class="site-demo-btn">
        <button type="button" class="layui-btn layui-btn-normal" id="copy">复制返回值</button>
@@ -503,7 +503,7 @@ mark {
     <div class="site-demo-editor">
       <div class="site-demo-area">
         <!--<textarea id="jscookie" placeholder="这里是Cookie数据" class="layui-textarea"></textarea>-->
-        <div class="textarea" contenteditable="true" placeholder="这里是Cookie数据" id="jscookie"></div>
+        <div class="textarea" contenteditable="true" placeholder="这里是Cookie数据" id="jscookie" textbool="false"></div>
       </div>
       <div class="site-demo-btn">
         <button type="button" class="layui-btn layui-btn-normal" id="copy2">复制Cookie数据</button>
@@ -748,6 +748,17 @@ $("#buttonid,#buttonid2").click(function() {
             sleep(50).then(() => {
 
 
+                /*重置数据*/
+                var bool = getnull($(btnname).attr("textbool"));
+                if (bool == true || bool == "true") {
+                    try {
+                        var textcode = $(btnname).text();
+                        $(btnname).text(textcode);
+                    } catch (e) {};
+                }
+                /*重置数据*/
+
+
                 try {
 
                     var getval = HTMLEncode($(btnname).text());
@@ -760,10 +771,14 @@ $("#buttonid,#buttonid2").click(function() {
                             time: 2000
                         });
 
+                        /*
                         unmarkword(function() {
                             markword(btnname, text, "querySelector");
                         });
+                        */
 
+                        $(btnname).attr("textbool", "true");
+                        markword(btnname, text, "querySelector");
                     } else {
                         layer.close(loading2);
                         layer.msg("没有找到相关字符串", {
