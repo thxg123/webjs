@@ -22,7 +22,12 @@ function sleep(ms) {
 
 function typeof2(val) {
     try {
-        return Object.prototype.toString.call(val).slice(8, -1).toLowerCase();
+        datatype = Object.prototype.toString.call(val).slice(8, -1).toLowerCase();
+        if (datatype) {
+            return datatype;
+        } else {
+            return Object.prototype.toString.call(val).match(/\w+/g)[3].toLowerCase();
+        }
     } catch (e) {
         return typeof(val);
     }
@@ -196,7 +201,6 @@ function Appcache() {
 };
 </script>
 
-
 <style type="text/css">
 .textarea {
 width:100%;
@@ -226,21 +230,14 @@ word-wrap:break-word;
  color:darkgray;
 }
 
-mark {
- background-color:#5FB878;
- color:#ffffff;
-}
-
 .highlight {
  background-color:#5FB878;
  color:#ffffff;
 }
  </style>
 
-
 </head>
 <body>
-
 
 <div class="layui-layout layui-layout-admin">
 <div class="header header-demo">
