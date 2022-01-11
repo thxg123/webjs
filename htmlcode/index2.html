@@ -116,6 +116,7 @@ function HTMLEncode(str) {
 };
 
 jszy = function(str) {
+    var str = getnull(str);
     var reg = /[\\\/\"\'\(\)\[\]\{\}\$\^\*\+\-\_\?\!\=\:\.\,\|\t\r\n]/g;
     var reg_arr = {};
     reg_arr["\\"] = '\\\\';
@@ -151,6 +152,7 @@ jszy = function(str) {
 };
 
 function jszy123(text) {
+    var text = getnull(text);
     var text = text.replace(/\\/g, '\\\\');
     var text = text.replace(/\//g, '\\\/');
     var text = text.replace(/\"/g, '\\"');
